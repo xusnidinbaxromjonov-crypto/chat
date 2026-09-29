@@ -4,6 +4,7 @@ import { useAppStore } from './store/useAppStore';
 import { useAuthStore } from './store/useAuthStore';
 import { useChatStore } from './store/useChatStore';
 import { socket } from './socket';
+import { supabase } from './lib/supabase';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Messenger from './pages/Messenger';
@@ -23,8 +24,49 @@ function App() {
     socket.on('sync_users', setUsers);
     socket.on('sync_chats', setChats);
     socket.on('sync_messages', setMessages);
-    socket.on('sync_ads', setAds);
     
+    // Ads from Supabase
+    const fetchAds = async () => {
+      const { data, error } = await supabase.from('ads').select('*').order('created_at', { ascending: false });
+      if (!error && data) {
+        const formattedAds = data.map(d => ({
+          id: d.id,
+          ownerId: d.owner_id,
+          ownerName: d.owner_name,
+          ownerAvatar: d.owner_avatar,
+          title: d.title,
+          price: d.price,
+          description: d.description,
+          createdAt: d.created_at
+        }));
+        // We replace the entire ads array with the source of truth from DB
+        useChatStore.setState({ ads: formattedAds });
+      }
+    };
+    
+    if (isAuthenticated) {
+      fetchAds();
+    }
+    
+    // Supabase realtime subscription for ads
+    const adsSubscription = supabase
+      .channel('public:ads')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ads' }, payload => {
+        const newDbAd = payload.new;
+        const newAd = {
+          id: newDbAd.id,
+          ownerId: newDbAd.owner_id,
+          ownerName: newDbAd.owner_name,
+          ownerAvatar: newDbAd.owner_avatar,
+          title: newDbAd.title,
+          price: newDbAd.price,
+          description: newDbAd.description,
+          createdAt: newDbAd.created_at
+        };
+        useChatStore.getState().addAd(newAd);
+      })
+      .subscribe();
+      
     if (isAuthenticated && user) {
        socket.emit('login', user);
     }
@@ -33,9 +75,9 @@ function App() {
       socket.off('sync_users');
       socket.off('sync_chats');
       socket.off('sync_messages');
-      socket.off('sync_ads');
+      supabase.removeChannel(adsSubscription);
     };
-  }, [isAuthenticated, user, setUsers, setChats, setMessages, setAds]);
+  }, [isAuthenticated, user, setUsers, setChats, setMessages]);
 
   useEffect(() => {
     if (isAuthenticated && user?.avatar?.includes('pravatar')) {

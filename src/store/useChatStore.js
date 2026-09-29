@@ -60,7 +60,10 @@ export const useChatStore = create(
         });
         return { ads: merged };
       }),
-      addAd: (ad) => set((state) => ({ ads: [ad, ...state.ads] })),
+      addAd: (ad) => set((state) => {
+        if (state.ads.some(a => a.id === ad.id)) return state;
+        return { ads: [ad, ...state.ads] };
+      }),
       addChat: (chat) => set((state) => ({ chats: [chat, ...state.chats] })),
   
   sendMessage: (chatId, text, senderId, imageUrl = null) => {

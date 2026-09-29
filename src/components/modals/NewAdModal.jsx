@@ -3,27 +3,39 @@ import Modal from '../ui/Modal';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useChatStore } from '../../store/useChatStore';
 import { socket } from '../../socket';
+import { supabase } from '../../lib/supabase';
 
 export default function NewAdModal({ isOpen, onClose }) {
   const { user } = useAuthStore();
   const [title, setTitle] = useState('');
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!title.trim()) return;
 
     const newAd = {
       id: `ad_${Date.now()}`,
-      ownerId: user.id,
-      ownerName: user.fullName,
-      ownerAvatar: user.avatar,
+      owner_id: user.id,
+      owner_name: user.fullName,
+      owner_avatar: user.avatar,
       title,
-      createdAt: new Date().toISOString()
+      created_at: new Date().toISOString()
     };
     
     // Optimsitic UI update
-    useChatStore.getState().addAd(newAd);
+    useChatStore.getState().addAd({
+      id: newAd.id,
+      ownerId: newAd.owner_id,
+      ownerName: newAd.owner_name,
+      ownerAvatar: newAd.owner_avatar,
+      title: newAd.title,
+      createdAt: newAd.created_at
+    });
     
-    socket.emit('new_ad', newAd);
+    // Insert into Supabase
+    const { error } = await supabase.from('ads').insert([newAd]);
+    if (error) {
+      console.error('Error creating ad:', error);
+    }
     
     setTitle('');
     onClose();
