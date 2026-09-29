@@ -110,7 +110,17 @@ export default function ChatArea() {
         </div>
         
         <div className="chat-header-actions">
-          {/* Actions can be added here */}
+          <button 
+            className="btn-icon" 
+            onClick={() => {
+              useAppStore.getState().setSidebarOpen(true);
+              useChatStore.getState().setActiveChat(null);
+            }} 
+            title="Chatni yopish"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            <X size={22} />
+          </button>
         </div>
       </div>
 
