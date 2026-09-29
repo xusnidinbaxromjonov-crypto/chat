@@ -44,8 +44,25 @@ function App() {
       }
     };
     
+    // Users from Supabase
+    const fetchUsers = async () => {
+      const { data, error } = await supabase.from('users').select('*');
+      if (!error && data) {
+        const formattedUsers = data.map(d => ({
+          id: d.id,
+          username: d.username,
+          fullName: d.full_name,
+          avatar: d.avatar_url,
+          isOnline: d.is_online,
+          lastSeen: d.last_seen
+        }));
+        useChatStore.getState().setUsers(formattedUsers);
+      }
+    };
+    
     if (isAuthenticated) {
       fetchAds();
+      fetchUsers();
     }
     
     // Supabase realtime subscription for ads
@@ -67,6 +84,14 @@ function App() {
       })
       .subscribe();
       
+    // Supabase realtime subscription for users
+    const usersSubscription = supabase
+      .channel('public:users')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, payload => {
+        fetchUsers();
+      })
+      .subscribe();
+      
     if (isAuthenticated && user) {
        socket.emit('login', user);
     }
@@ -76,6 +101,7 @@ function App() {
       socket.off('sync_chats');
       socket.off('sync_messages');
       supabase.removeChannel(adsSubscription);
+      supabase.removeChannel(usersSubscription);
     };
   }, [isAuthenticated, user, setUsers, setChats, setMessages]);
 
