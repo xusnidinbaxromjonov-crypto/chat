@@ -19,9 +19,8 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
-
+  useEffect(() => {
     // socket listeners removed completely as we are now fully on Supabase
-
     // Ads from Supabase
     const fetchAds = async () => {
       const { data, error } = await supabase.from('ads').select('*').order('created_at', { ascending: false });
