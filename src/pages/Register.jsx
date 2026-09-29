@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { supabase } from '../lib/supabase';
 import '../styles/auth.css';
 
 export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
+    email: '',
     password: ''
   });
   const [error, setError] = useState('');
@@ -17,26 +19,41 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.username || !formData.password) {
+    if (!formData.username || !formData.email || !formData.password) {
       setError('Iltimos barcha maydonlarni to\'ldiring');
       return;
     }
     
-    // Mock registration login logic
-    const user = {
-      id: formData.username.toLowerCase().replace(/\s+/g, ''),
-      username: formData.username.toLowerCase().replace(/\s+/g, ''),
-      fullName: formData.username,
-      email: `${formData.username.toLowerCase().replace(/\s+/g, '')}@nova.chat`,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${formData.username}&backgroundColor=ff7597`,
-      isAdmin: false,
-      bio: 'Salom, men Nova chatdaman!'
-    };
-    
-    login(user);
-    navigate('/');
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.username,
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      const user = {
+        id: data.user.id,
+        username: formData.username.toLowerCase().replace(/\s+/g, ''),
+        fullName: formData.username,
+        email: formData.email,
+        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${formData.username}&backgroundColor=ff7597`,
+        isAdmin: false,
+        bio: 'Salom, men Nova chatdaman!'
+      };
+      
+      login(user);
+      navigate('/');
+    } catch (err) {
+      setError(err.message || "Ro'yxatdan o'tishda xatolik yuz berdi");
+    }
   };
 
   return (
@@ -66,6 +83,20 @@ export default function Register() {
                 name="username"
                 placeholder="Ismingizni kiriting" 
                 value={formData.username}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label>Email</label>
+            <div className="input-wrapper">
+              <Mail className="input-icon" />
+              <input 
+                type="email" 
+                name="email"
+                placeholder="Emailingizni kiriting" 
+                value={formData.email}
                 onChange={handleChange}
               />
             </div>

@@ -2,38 +2,48 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Lock, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { supabase } from '../lib/supabase';
 import '../styles/auth.css';
-import { mockUsers } from '../data/mockData';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
+    if (!email || !password) {
       setError('Iltimos barcha maydonlarni to\'ldiring');
       return;
     }
     
-    const isAdminUser = username === 'admin' && password === 'admin123456';
-    
-    // Mock login logic
-    const user = {
-      id: isAdminUser ? 'admin' : username.toLowerCase().replace(/\s+/g, ''),
-      username: isAdminUser ? 'admin' : username.toLowerCase().replace(/\s+/g, ''),
-      fullName: isAdminUser ? 'System Admin' : username,
-      email: isAdminUser ? 'admin@nova.chat' : `${username.toLowerCase().replace(/\s+/g, '')}@nova.chat`,
-      avatar: isAdminUser ? 'https://api.dicebear.com/7.x/initials/svg?seed=admin&backgroundColor=ff7597' : `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundColor=ff7597`,
-      isAdmin: isAdminUser,
-      bio: isAdminUser ? 'System Administrator' : 'Salom, men Nova chatdaman!'
-    };
-    
-    login(user);
-    navigate(user.isAdmin ? '/admin' : '/');
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+      
+      const fullName = data.user.user_metadata?.full_name || email.split('@')[0];
+
+      const user = {
+        id: data.user.id,
+        username: fullName.toLowerCase().replace(/\s+/g, ''),
+        fullName: fullName,
+        email: email,
+        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${fullName}&backgroundColor=ff7597`,
+        isAdmin: false,
+        bio: 'Salom, men Nova chatdaman!'
+      };
+      
+      login(user);
+      navigate('/');
+    } catch (err) {
+      setError(err.message || "Tizimga kirishda xatolik yuz berdi");
+    }
   };
 
   return (
@@ -55,14 +65,14 @@ export default function Login() {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>Ismingiz</label>
+            <label>Email</label>
             <div className="input-wrapper">
               <User className="input-icon" />
               <input 
-                type="text" 
-                placeholder="Ismingizni kiriting" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email" 
+                placeholder="Emailingizni kiriting" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
