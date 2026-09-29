@@ -7,7 +7,6 @@ import '../styles/auth.css';
 export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
     password: ''
   });
   const [error, setError] = useState('');
@@ -20,20 +19,20 @@ export default function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.username || !formData.email || !formData.password) {
-      setError('Please fill in all fields');
+    if (!formData.username || !formData.password) {
+      setError('Iltimos barcha maydonlarni to\'ldiring');
       return;
     }
     
     // Mock registration login logic
     const user = {
-      id: formData.username,
-      username: formData.username,
+      id: formData.username.toLowerCase().replace(/\s+/g, ''),
+      username: formData.username.toLowerCase().replace(/\s+/g, ''),
       fullName: formData.username,
-      email: formData.email,
+      email: `${formData.username.toLowerCase().replace(/\s+/g, '')}@nova.chat`,
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${formData.username}&backgroundColor=ff7597`,
       isAdmin: false,
-      bio: 'New to Nova Chat!'
+      bio: 'Salom, men Nova chatdaman!'
     };
     
     login(user);
@@ -47,8 +46,8 @@ export default function Register() {
           <div className="auth-logo">
             NOVA<Sparkles className="inline-block ml-1 w-6 h-6 text-accent" />
           </div>
-          <h1 className="auth-title">Create Account</h1>
-          <p className="auth-subtitle">Join Nova Chat today</p>
+          <h1 className="auth-title">Ro'yxatdan O'tish</h1>
+          <p className="auth-subtitle">Nova Chatga xush kelibsiz</p>
         </div>
 
         {error && (
@@ -59,13 +58,13 @@ export default function Register() {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>Username</label>
+            <label>Ismingiz</label>
             <div className="input-wrapper">
               <User className="input-icon" />
               <input 
                 type="text" 
                 name="username"
-                placeholder="Choose a username" 
+                placeholder="Ismingizni kiriting" 
                 value={formData.username}
                 onChange={handleChange}
               />
@@ -73,27 +72,13 @@ export default function Register() {
           </div>
 
           <div className="input-group">
-            <label>Email</label>
-            <div className="input-wrapper">
-              <Mail className="input-icon" />
-              <input 
-                type="email" 
-                name="email"
-                placeholder="Enter your email" 
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="input-group">
-            <label>Password</label>
+            <label>Parol</label>
             <div className="input-wrapper">
               <Lock className="input-icon" />
               <input 
                 type="password" 
                 name="password"
-                placeholder="Create a password" 
+                placeholder="Parol yarating" 
                 value={formData.password}
                 onChange={handleChange}
               />
@@ -101,13 +86,13 @@ export default function Register() {
           </div>
 
           <button type="submit" className="btn-primary auth-submit">
-            Sign Up
+            Ro'yxatdan O'tish
           </button>
         </form>
 
         <div className="auth-footer">
-          Already have an account? 
-          <Link to="/login" className="auth-link">Sign in</Link>
+          Allaqachon akkauntingiz bormi? 
+          <Link to="/login" className="auth-link">Kirish</Link>
         </div>
       </div>
     </div>

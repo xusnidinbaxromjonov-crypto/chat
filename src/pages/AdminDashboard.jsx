@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, MessageSquare, AlertTriangle, Activity, Settings, LogOut, Shield, Search } from 'lucide-react';
+import { Users, MessageSquare, AlertTriangle, Activity, Settings, LogOut, Shield, Search, Edit2, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
   const { logout } = useAuthStore();
-  const { users, messages, chats } = useChatStore();
+  const { users, messages, chats, deleteMessage, editMessage } = useChatStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('monitor');
 
@@ -53,53 +53,18 @@ export default function AdminDashboard() {
 
       <div className="admin-content">
         <div className="admin-header">
-          <h1 className="admin-title">Statistika</h1>
+          <h1 className="admin-title">Boshqaruv Paneli</h1>
           <button className="btn-primary" onClick={() => navigate('/')}>
             Ilovaga qaytish
           </button>
         </div>
 
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: '#eef2ff', color: '#6366f1' }}><Users size={28} /></div>
-            <div className="stat-info">
-              <h4>Jami foydalanuvchilar</h4>
-              <p>{users.length + 1520}</p>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: '#ecfdf5', color: '#10b981' }}><Activity size={28} /></div>
-            <div className="stat-info">
-              <h4>Hozir onlayn</h4>
-              <p>{users.filter(u => u.isOnline).length + 342}</p>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: '#f5f3ff', color: '#8b5cf6' }}><MessageSquare size={28} /></div>
-            <div className="stat-info">
-              <h4>Bugungi xabarlar</h4>
-              <p>42,150</p>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: '#fef2f2', color: '#ef4444' }}>
-              <AlertTriangle size={28} />
-            </div>
-            <div className="stat-info">
-              <h4>Faol guruhlar</h4>
-              <p>12</p>
-            </div>
-          </div>
-        </div>
+
 
         {activeTab === 'users' && (
           <div className="users-table-container">
             <div className="users-table-header">
               <h3>Foydalanuvchilar ro'yxati</h3>
-              <div className="search-container" style={{ width: '300px', padding: 0 }}>
-                <Search className="search-icon" style={{ left: '10px' }} />
-                <input type="text" placeholder="Qidirish..." style={{ paddingLeft: '32px' }} />
-              </div>
             </div>
             <table>
               <thead>
@@ -131,7 +96,10 @@ export default function AdminDashboard() {
                       <span className="status-badge active">Active</span>
                     </td>
                     <td>
-                      <button style={{ color: '#3b82f6', background: 'transparent' }}><Search size={18}/></button>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button style={{ color: '#3b82f6', background: 'transparent', cursor: 'pointer' }}><Edit2 size={16}/></button>
+                        <button style={{ color: '#ef4444', background: 'transparent', cursor: 'pointer' }}><Trash2 size={16}/></button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -144,10 +112,6 @@ export default function AdminDashboard() {
           <div className="users-table-container">
             <div className="users-table-header">
               <h3>Jonli xabarlar oqimi</h3>
-              <div className="search-container" style={{ width: '300px', padding: 0 }}>
-                <Search className="search-icon" style={{ left: '10px' }} />
-                <input type="text" placeholder="Xabarlardan qidirish..." style={{ paddingLeft: '32px' }} />
-              </div>
             </div>
             
             {Object.keys(messages).length === 0 ? (
@@ -188,11 +152,22 @@ export default function AdminDashboard() {
                       </td>
                       <td>{m.chatName}</td>
                       <td>{new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-                      <td style={{ maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {m.imageUrl ? '[Rasm yuborildi]' : m.text}
+                      <td style={{ maxWidth: '250px' }}>
+                        {m.text && <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.text}</div>}
+                        {m.imageUrl && (
+                          <img src={m.imageUrl} alt="Rasm" style={{ maxWidth: '60px', maxHeight: '60px', borderRadius: '8px', marginTop: m.text ? '4px' : '0', border: '1px solid #e2e8f0', objectFit: 'cover' }} />
+                        )}
                       </td>
                       <td>
-                        <button style={{ color: '#3b82f6', background: 'transparent' }}><Search size={18}/></button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button style={{ color: '#3b82f6', background: 'transparent', cursor: 'pointer' }} onClick={() => {
+                            const newText = window.prompt("Xabarni tahrirlash:", m.text);
+                            if (newText !== null && newText.trim() !== "") {
+                              editMessage(m.chatId, m.id, newText.trim());
+                            }
+                          }}><Edit2 size={16}/></button>
+                          <button style={{ color: '#ef4444', background: 'transparent', cursor: 'pointer' }} onClick={() => deleteMessage(m.chatId, m.id)}><Trash2 size={16}/></button>
+                        </div>
                       </td>
                     </tr>
                   ))}

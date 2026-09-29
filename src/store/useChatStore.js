@@ -27,6 +27,14 @@ export const useChatStore = create((set, get) => ({
     
     socket.emit('new_message', { chatId, message: newMessage });
   },
+
+  editMessage: (chatId, messageId, newText) => {
+    socket.emit('edit_message', { chatId, messageId, newText });
+  },
+
+  deleteMessage: (chatId, messageId) => {
+    socket.emit('delete_message', { chatId, messageId });
+  },
   
   markAsRead: (chatId) => {
     set((state) => ({

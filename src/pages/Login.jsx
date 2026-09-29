@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Sparkles } from 'lucide-react';
+import { User, Lock, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import '../styles/auth.css';
 import { mockUsers } from '../data/mockData';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -14,19 +14,22 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('Please fill in all fields');
+    if (!username || !password) {
+      setError('Iltimos barcha maydonlarni to\'ldiring');
       return;
+    }
+    
+    const isAdminUser = username === 'admin' && password === 'admin123456';
+    
     // Mock login logic
-    const username = email.split('@')[0];
     const user = {
-      id: username,
-      username: username,
-      fullName: username.charAt(0).toUpperCase() + username.slice(1),
-      email,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundColor=ff7597`,
-      isAdmin: false,
-      bio: 'Ready to chat!'
+      id: isAdminUser ? 'admin' : username.toLowerCase().replace(/\s+/g, ''),
+      username: isAdminUser ? 'admin' : username.toLowerCase().replace(/\s+/g, ''),
+      fullName: isAdminUser ? 'System Admin' : username,
+      email: isAdminUser ? 'admin@nova.chat' : `${username.toLowerCase().replace(/\s+/g, '')}@nova.chat`,
+      avatar: isAdminUser ? 'https://api.dicebear.com/7.x/initials/svg?seed=admin&backgroundColor=ff7597' : `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundColor=ff7597`,
+      isAdmin: isAdminUser,
+      bio: isAdminUser ? 'System Administrator' : 'Salom, men Nova chatdaman!'
     };
     
     login(user);
@@ -40,8 +43,8 @@ export default function Login() {
           <div className="auth-logo">
             NOVA<Sparkles className="inline-block ml-1 w-6 h-6 text-accent" />
           </div>
-          <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">Sign in to continue to Nova Chat</p>
+          <h1 className="auth-title">Xush kelibsiz</h1>
+          <p className="auth-subtitle">Davom etish uchun tizimga kiring</p>
         </div>
 
         {error && (
@@ -52,25 +55,25 @@ export default function Login() {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>Email or Phone</label>
+            <label>Ismingiz</label>
             <div className="input-wrapper">
-              <Mail className="input-icon" />
+              <User className="input-icon" />
               <input 
                 type="text" 
-                placeholder="Enter your email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ismingizni kiriting" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
           </div>
 
           <div className="input-group">
-            <label>Password</label>
+            <label>Parol</label>
             <div className="input-wrapper">
               <Lock className="input-icon" />
               <input 
                 type="password" 
-                placeholder="Enter your password" 
+                placeholder="Parolni kiriting" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -78,13 +81,13 @@ export default function Login() {
           </div>
 
           <button type="submit" className="btn-primary auth-submit">
-            Sign In
+            Kirish
           </button>
         </form>
 
         <div className="auth-footer">
-          Don't have an account? 
-          <Link to="/register" className="auth-link">Sign up</Link>
+          Akkauntingiz yo'qmi? 
+          <Link to="/register" className="auth-link">Ro'yxatdan o'tish</Link>
         </div>
       </div>
     </div>

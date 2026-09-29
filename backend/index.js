@@ -64,6 +64,23 @@ io.on('connection', (socket) => {
     io.emit('sync_messages', messages);
   });
 
+  socket.on('edit_message', ({ chatId, messageId, newText }) => {
+    if (messages[chatId]) {
+      const msg = messages[chatId].find(m => m.id === messageId);
+      if (msg) {
+        msg.text = newText;
+        io.emit('sync_messages', messages);
+      }
+    }
+  });
+
+  socket.on('delete_message', ({ chatId, messageId }) => {
+    if (messages[chatId]) {
+      messages[chatId] = messages[chatId].filter(m => m.id !== messageId);
+      io.emit('sync_messages', messages);
+    }
+  });
+
   socket.on('new_ad', (ad) => {
     ads.unshift(ad); // put newest first
     io.emit('sync_ads', ads);

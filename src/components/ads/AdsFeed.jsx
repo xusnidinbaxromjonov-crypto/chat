@@ -70,9 +70,9 @@ export default function AdsFeed() {
                   </div>
                 </div>
                 <div className="ad-card-body">
-                  <h3>{ad.title}</h3>
-                  <p>{ad.description}</p>
-                  <div className="ad-price">{ad.price}</div>
+                  <h3 style={{ marginBottom: (!ad.description && !ad.price) ? '16px' : '8px' }}>{ad.title}</h3>
+                  {ad.description && <p>{ad.description}</p>}
+                  {ad.price && <div className="ad-price">{ad.price}</div>}
                 </div>
                 {!isMe && (
                   <div className="ad-card-footer">
