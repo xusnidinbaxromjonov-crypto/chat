@@ -117,3 +117,24 @@
   font-size: 16px;
   height: 100%;
 }
+
+@media (max-width: 768px) {
+  .ads-header {
+    padding: 16px;
+  }
+  
+  .ads-header-title h2 {
+    font-size: 18px;
+  }
+  
+  .ads-header .btn-primary {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .ads-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 16px;
+  }
+}

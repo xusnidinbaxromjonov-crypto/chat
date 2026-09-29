@@ -11,7 +11,7 @@ import './Sidebar.css';
 export default function Sidebar() {
   const { user } = useAuthStore();
   const { chats, activeChatId, setActiveChat, users } = useChatStore();
-  const { theme, toggleTheme } = useAppStore();
+  const { theme, toggleTheme, isSidebarOpen, setSidebarOpen } = useAppStore();
   const [activeTab, setActiveTab] = useState('chats');
   const [searchQuery, setSearchQuery] = useState('');
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
@@ -45,7 +45,7 @@ export default function Sidebar() {
   );
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${!isSidebarOpen ? 'hidden' : ''}`}>
       <div className="sidebar-header">
         <div className="user-profile-preview">
           <img src={user?.avatar || 'https://i.pravatar.cc/150'} alt="Profile" />
@@ -90,6 +90,15 @@ export default function Sidebar() {
         >
           Groups
         </div>
+        <div 
+          className="sidebar-tab mobile-only"
+          onClick={() => {
+            setActiveChat(null);
+            setSidebarOpen(false);
+          }}
+        >
+          E'lonlar
+        </div>
       </div>
 
       <div className="chat-list scrollbar-hide">
@@ -97,7 +106,12 @@ export default function Sidebar() {
           <div 
             key={chat.id} 
             className={`chat-item ${activeChatId === chat.id ? 'active' : ''}`}
-            onClick={() => setActiveChat(chat.id)}
+            onClick={() => {
+              setActiveChat(chat.id);
+              if (window.innerWidth <= 768) {
+                setSidebarOpen(false);
+              }
+            }}
           >
             <div className="chat-item-avatar-container">
               <img src={getChatAvatar(chat)} alt={getChatName(chat)} className="chat-item-avatar" />

@@ -3,12 +3,14 @@ import { useChatStore } from '../../store/useChatStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { socket } from '../../socket';
 import NewAdModal from '../modals/NewAdModal';
-import { MessageSquare, Plus, Tag } from 'lucide-react';
+import { useAppStore } from '../../store/useAppStore';
+import { MessageSquare, Plus, Tag, Menu } from 'lucide-react';
 import './AdsFeed.css';
 
 export default function AdsFeed() {
   const { ads, users, setActiveChat, chats } = useChatStore();
   const { user: currentUser } = useAuthStore();
+  const { setSidebarOpen } = useAppStore();
   const [isNewAdOpen, setIsNewAdOpen] = useState(false);
 
   const handleContact = (ad) => {
@@ -41,6 +43,13 @@ export default function AdsFeed() {
     <div className="ads-feed">
       <div className="ads-header">
         <div className="ads-header-title">
+          <button 
+            className="btn-icon mobile-only" 
+            onClick={() => setSidebarOpen(true)}
+            style={{ marginRight: '8px', marginLeft: '-12px' }}
+          >
+            <Menu size={20} />
+          </button>
           <Tag size={24} style={{ color: 'var(--accent-color)' }} />
           <h2>E'lonlar (Marketplace)</h2>
         </div>

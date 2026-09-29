@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Paperclip, Smile, Send, Check, CheckCheck, MessageSquare, Image, Edit2, Trash2, X } from 'lucide-react';
+import { Search, Paperclip, Smile, Send, Check, CheckCheck, MessageSquare, Image, Edit2, Trash2, X, ArrowLeft } from 'lucide-react';
 import { useChatStore } from '../../store/useChatStore';
 import { useAppStore } from '../../store/useAppStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -90,6 +90,16 @@ export default function ChatArea() {
       {/* Header */}
       <div className="chat-header">
         <div className="chat-header-info">
+          <button 
+            className="btn-icon mobile-only" 
+            onClick={() => {
+              useAppStore.getState().setSidebarOpen(true);
+              useChatStore.getState().setActiveChat(null);
+            }} 
+            style={{ marginRight: '12px', marginLeft: '-8px' }}
+          >
+            <ArrowLeft size={20} />
+          </button>
           <img src={getChatAvatar()} alt={getChatName()} className="chat-header-avatar" />
           <div className="chat-header-text">
             <h2>{getChatName()}</h2>

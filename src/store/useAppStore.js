@@ -14,6 +14,9 @@ export const useAppStore = create(
       rightPanelOpen: false,
       toggleRightPanel: () => set((state) => ({ rightPanelOpen: !state.rightPanelOpen })),
       setRightPanelOpen: (isOpen) => set({ rightPanelOpen: isOpen }),
+      
+      isSidebarOpen: true,
+      setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
     }),
     {
       name: 'nova-app-storage',

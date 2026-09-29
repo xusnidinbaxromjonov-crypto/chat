@@ -224,6 +224,10 @@ input, textarea {
   }
 }
 
+.mobile-only {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
@@ -234,5 +238,8 @@ input, textarea {
   }
   .sidebar.hidden {
     transform: translateX(-100%);
+  }
+  .mobile-only {
+    display: flex !important;
   }
 }
