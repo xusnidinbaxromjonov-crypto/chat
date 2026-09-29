@@ -20,11 +20,8 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  useEffect(() => {
-    socket.on('sync_users', setUsers);
-    socket.on('sync_chats', setChats);
-    socket.on('sync_messages', setMessages);
-    
+    // socket listeners removed completely as we are now fully on Supabase
+
     // Ads from Supabase
     const fetchAds = async () => {
       const { data, error } = await supabase.from('ads').select('*').order('created_at', { ascending: false });
@@ -60,9 +57,48 @@ function App() {
       }
     };
     
+    // Chats from Supabase
+    const fetchChats = async () => {
+      const { data, error } = await supabase.from('chats').select('*');
+      if (!error && data) {
+        const formattedChats = data.map(c => ({
+          id: c.id,
+          isGroup: c.is_group,
+          name: c.name,
+          avatar: c.avatar,
+          participants: c.participants,
+          unreadCount: 0,
+        }));
+        useChatStore.getState().setChats(formattedChats);
+      }
+    };
+    
+    // Messages from Supabase
+    const fetchMessages = async () => {
+      const { data, error } = await supabase.from('messages').select('*').order('timestamp', { ascending: true });
+      if (!error && data) {
+        // Group by chatId
+        const grouped = {};
+        data.forEach(m => {
+          if (!grouped[m.chat_id]) grouped[m.chat_id] = [];
+          grouped[m.chat_id].push({
+            id: m.id,
+            senderId: m.sender_id,
+            text: m.text,
+            imageUrl: m.image_url,
+            isRead: m.is_read,
+            timestamp: m.timestamp
+          });
+        });
+        useChatStore.getState().setMessages(grouped);
+      }
+    };
+
     if (isAuthenticated) {
       fetchAds();
       fetchUsers();
+      fetchChats();
+      fetchMessages();
     }
     
     // Supabase realtime subscription for ads
@@ -92,16 +128,31 @@ function App() {
       })
       .subscribe();
       
+    // Supabase realtime subscription for chats
+    const chatsSubscription = supabase
+      .channel('public:chats')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, payload => {
+        fetchChats();
+      })
+      .subscribe();
+      
+    // Supabase realtime subscription for messages
+    const messagesSubscription = supabase
+      .channel('public:messages')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, payload => {
+        fetchMessages();
+      })
+      .subscribe();
+      
     if (isAuthenticated && user) {
-       socket.emit('login', user);
+       // local socket emit removed
     }
     
     return () => {
-      socket.off('sync_users');
-      socket.off('sync_chats');
-      socket.off('sync_messages');
       supabase.removeChannel(adsSubscription);
       supabase.removeChannel(usersSubscription);
+      supabase.removeChannel(chatsSubscription);
+      supabase.removeChannel(messagesSubscription);
     };
   }, [isAuthenticated, user, setUsers, setChats, setMessages]);
 

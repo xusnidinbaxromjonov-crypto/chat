@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Modal from '../ui/Modal';
 import { useChatStore } from '../../store/useChatStore';
 import { useAuthStore } from '../../store/useAuthStore';
-import { socket } from '../../socket';
+import { supabase } from '../../lib/supabase';
 
 export default function NewChatModal({ isOpen, onClose }) {
   const [username, setUsername] = useState('');
@@ -10,7 +10,7 @@ export default function NewChatModal({ isOpen, onClose }) {
   const { sendMessage, setActiveChat, chats, users, addChat } = useChatStore();
   const { user: currentUser } = useAuthStore();
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!username.trim() || !message.trim()) return;
 
     const targetUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
@@ -35,13 +35,22 @@ export default function NewChatModal({ isOpen, onClose }) {
     
     // Optimistic updates
     addChat(newChat);
-    const state = useChatStore.getState();
-    state.setMessages({
-      ...state.messages,
-      [chatId]: [newChat.lastMessage]
-    });
+    const dbChat = {
+        id: chatId,
+        is_group: false,
+        name: null,
+        avatar: null,
+        participants: [currentUser.id, targetUser.id],
+        created_at: new Date().toISOString()
+    };
     
-    socket.emit('new_message', { chatId, message: newChat.lastMessage, chat: newChat });
+    // Insert chat to Supabase
+    const { error: chatError } = await supabase.from('chats').insert([dbChat]);
+    
+    // Then send first message
+    if (!chatError) {
+      sendMessage(chatId, message, currentUser.id);
+    }
     setActiveChat(chatId);
     
     setUsername('');

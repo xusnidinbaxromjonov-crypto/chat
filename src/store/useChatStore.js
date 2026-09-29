@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { mockChats, mockMessages, mockUsers, mockAds } from '../data/mockData';
 import { socket } from '../socket';
+import { supabase } from '../lib/supabase';
 
 export const useChatStore = create(
   persist(
@@ -64,16 +65,20 @@ export const useChatStore = create(
         if (state.ads.some(a => a.id === ad.id)) return state;
         return { ads: [ad, ...state.ads] };
       }),
-      addChat: (chat) => set((state) => ({ chats: [chat, ...state.chats] })),
+      addChat: (chat) => set((state) => {
+        if (state.chats.some(c => c.id === chat.id)) return state;
+        return { chats: [chat, ...state.chats] };
+      }),
   
-  sendMessage: (chatId, text, senderId, imageUrl = null) => {
-    const newMessage = {
-      id: `m_${Date.now()}`,
-      senderId,
+  sendMessage: async (chatId, text, senderId, imageUrl = null) => {
+    const dbMessage = {
+      id: `m_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      chat_id: chatId,
+      sender_id: senderId,
       text,
-      imageUrl,
+      image_url: imageUrl,
       timestamp: new Date().toISOString(),
-      isRead: false,
+      is_read: false,
     };
     
     // Optimistic UI update
@@ -82,20 +87,45 @@ export const useChatStore = create(
       return {
         messages: {
           ...state.messages,
-          [chatId]: [...chatMessages, newMessage]
+          [chatId]: [...chatMessages, {
+            id: dbMessage.id,
+            senderId: dbMessage.sender_id,
+            text: dbMessage.text,
+            imageUrl: dbMessage.image_url,
+            timestamp: dbMessage.timestamp,
+            isRead: dbMessage.is_read
+          }]
         }
       };
     });
     
-    socket.emit('new_message', { chatId, message: newMessage });
+    await supabase.from('messages').insert([dbMessage]);
   },
 
-  editMessage: (chatId, messageId, newText) => {
-    socket.emit('edit_message', { chatId, messageId, newText });
+  editMessage: async (chatId, messageId, newText) => {
+    set((state) => {
+      const chatMessages = state.messages[chatId] || [];
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: chatMessages.map(m => m.id === messageId ? { ...m, text: newText } : m)
+        }
+      };
+    });
+    await supabase.from('messages').update({ text: newText }).eq('id', messageId);
   },
 
-  deleteMessage: (chatId, messageId) => {
-    socket.emit('delete_message', { chatId, messageId });
+  deleteMessage: async (chatId, messageId) => {
+    set((state) => {
+      const chatMessages = state.messages[chatId] || [];
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: chatMessages.filter(m => m.id !== messageId)
+        }
+      };
+    });
+    await supabase.from('messages').delete().eq('id', messageId);
   },
   
   markAsRead: (chatId) => {
