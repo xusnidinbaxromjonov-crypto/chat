@@ -18,7 +18,7 @@ export default function Login() {
       setError('Iltimos barcha maydonlarni to\'ldiring');
       return;
     }
-    if (email === 'admin' && password === 'admin123456') {
+    if (email.trim().toLowerCase() === 'admin' && password.trim() === 'admin123456') {
       const user = {
         id: 'admin',
         username: 'admin',
