@@ -67,8 +67,8 @@ export default function AdsFeed() {
           </div>
         ) : (
           ads.map((ad, i) => {
-            const owner = users.find(u => u.id === ad.ownerId);
-            const isMe = owner?.id === currentUser.id;
+            const isMe = ad.ownerId === currentUser.id;
+            const owner = isMe ? currentUser : users.find(u => u.id === ad.ownerId);
             return (
               <div key={ad.id || i} className="ad-card">
                 <div className="ad-card-header">

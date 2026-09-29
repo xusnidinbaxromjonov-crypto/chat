@@ -1,20 +1,23 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { mockChats, mockMessages, mockUsers, mockAds } from '../data/mockData';
 import { socket } from '../socket';
 
-export const useChatStore = create((set, get) => ({
-  chats: mockChats,
-  messages: mockMessages,
-  users: mockUsers,
-  ads: mockAds,
-  activeChatId: null,
-  
-  setActiveChat: (chatId) => set({ activeChatId: chatId }),
-  setUsers: (users) => set({ users }),
-  setChats: (chats) => set({ chats }),
-  setMessages: (messages) => set({ messages }),
-  setAds: (ads) => set({ ads }),
-  addAd: (ad) => set((state) => ({ ads: [ad, ...state.ads] })),
+export const useChatStore = create(
+  persist(
+    (set, get) => ({
+      chats: mockChats,
+      messages: mockMessages,
+      users: mockUsers,
+      ads: mockAds,
+      activeChatId: null,
+      
+      setActiveChat: (chatId) => set({ activeChatId: chatId }),
+      setUsers: (users) => set({ users }),
+      setChats: (chats) => set({ chats }),
+      setMessages: (messages) => set({ messages }),
+      setAds: (ads) => set({ ads }),
+      addAd: (ad) => set((state) => ({ ads: [ad, ...state.ads] })),
   
   sendMessage: (chatId, text, senderId, imageUrl = null) => {
     const newMessage = {
@@ -25,6 +28,17 @@ export const useChatStore = create((set, get) => ({
       timestamp: new Date().toISOString(),
       isRead: false,
     };
+    
+    // Optimistic UI update
+    set((state) => {
+      const chatMessages = state.messages[chatId] || [];
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: [...chatMessages, newMessage]
+        }
+      };
+    });
     
     socket.emit('new_message', { chatId, message: newMessage });
   },
@@ -44,4 +58,8 @@ export const useChatStore = create((set, get) => ({
       )
     }));
   }
-}));
+}),
+{
+  name: 'chat-storage',
+}
+));
