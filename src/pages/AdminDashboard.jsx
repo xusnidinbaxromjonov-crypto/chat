@@ -7,7 +7,7 @@ import './AdminDashboard.css';
 
 export default function AdminDashboard() {
   const { logout } = useAuthStore();
-  const { users, messages, chats, deleteMessage, editMessage } = useChatStore();
+  const { users, messages, chats, ads, deleteMessage, editMessage } = useChatStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('monitor');
 
@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   const navItems = [
     { id: 'monitor', icon: Activity, label: 'Dashboard' },
     { id: 'users', icon: Users, label: 'Foydalanuvchilar' },
+    { id: 'ads', icon: MessageSquare, label: 'E\'lonlar' },
   ];
 
   return (
@@ -103,6 +104,55 @@ export default function AdminDashboard() {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === 'ads' && (
+          <div className="users-table-container">
+            <div className="users-table-header">
+              <h3>Barcha E'lonlar</h3>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>№</th>
+                  <th>E'lon nomi</th>
+                  <th>Muallif</th>
+                  <th>Narxi</th>
+                  <th>Sana</th>
+                  <th>Batafsil</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ads.map((ad, i) => (
+                  <tr key={ad.id || i}>
+                    <td>{i + 1}</td>
+                    <td style={{ fontWeight: 500 }}>{ad.title}</td>
+                    <td>
+                      <div className="user-cell">
+                        <img src={ad.ownerAvatar || 'https://api.dicebear.com/7.x/initials/svg?seed=U'} alt="" />
+                        <div>{ad.ownerName || 'Foydalanuvchi'}</div>
+                      </div>
+                    </td>
+                    <td>{ad.price || '-'}</td>
+                    <td>{new Date(ad.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <button style={{ color: '#ef4444', background: 'transparent', cursor: 'pointer' }} onClick={() => {
+                        // TODO: delete ad
+                        alert("Hozircha o'chirish faollashtirilmagan");
+                      }}>
+                        <Trash2 size={16}/>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {ads.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>E'lonlar topilmadi.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
