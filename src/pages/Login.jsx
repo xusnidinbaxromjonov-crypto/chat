@@ -99,9 +99,6 @@ export default function Login() {
           Akkauntingiz yo'qmi? 
           <Link to="/register" className="auth-link">Ro'yxatdan o'tish</Link>
         </div>
-        <div className="auth-footer" style={{ marginTop: '8px', fontSize: '12px' }}>
-          <Link to="/admin/login" className="auth-link" style={{ color: '#64748b' }}>Admin panelga kirish</Link>
-        </div>
       </div>
     </div>
   );
