@@ -13,10 +13,53 @@ export const useChatStore = create(
       activeChatId: null,
       
       setActiveChat: (chatId) => set({ activeChatId: chatId }),
-      setUsers: (users) => set({ users }),
-      setChats: (chats) => set({ chats }),
-      setMessages: (messages) => set({ messages }),
-      setAds: (ads) => set({ ads }),
+      setUsers: (incomingUsers) => set((state) => {
+        const merged = [...state.users];
+        incomingUsers.forEach(iu => {
+          const idx = merged.findIndex(u => u.id === iu.id);
+          if (idx >= 0) merged[idx] = iu;
+          else merged.push(iu);
+        });
+        return { users: merged };
+      }),
+      setChats: (incomingChats) => set((state) => {
+        const merged = [...state.chats];
+        incomingChats.forEach(ic => {
+          const idx = merged.findIndex(c => c.id === ic.id);
+          if (idx >= 0) merged[idx] = ic;
+          else merged.push(ic);
+        });
+        return { chats: merged };
+      }),
+      setMessages: (incomingMessages) => set((state) => {
+        // incomingMessages is an object keyed by chatId
+        const merged = { ...state.messages };
+        Object.keys(incomingMessages).forEach(chatId => {
+          const msgs = incomingMessages[chatId];
+          if (!merged[chatId]) {
+            merged[chatId] = msgs;
+          } else {
+            // merge messages for this chat
+            const mergedMsgs = [...merged[chatId]];
+            msgs.forEach(m => {
+              const idx = mergedMsgs.findIndex(msg => msg.id === m.id);
+              if (idx >= 0) mergedMsgs[idx] = m;
+              else mergedMsgs.push(m);
+            });
+            merged[chatId] = mergedMsgs;
+          }
+        });
+        return { messages: merged };
+      }),
+      setAds: (incomingAds) => set((state) => {
+        const merged = [...state.ads];
+        incomingAds.forEach(ia => {
+          const idx = merged.findIndex(a => a.id === ia.id);
+          if (idx >= 0) merged[idx] = ia;
+          else merged.push(ia);
+        });
+        return { ads: merged };
+      }),
       addAd: (ad) => set((state) => ({ ads: [ad, ...state.ads] })),
       addChat: (chat) => set((state) => ({ chats: [chat, ...state.chats] })),
   
