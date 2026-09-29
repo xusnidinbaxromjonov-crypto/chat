@@ -141,3 +141,29 @@ export const mockMessages = {
     },
   ]
 };
+
+export const mockAds = [
+  {
+    id: 'ad_1',
+    ownerId: 'u1',
+    title: 'Noutbuk sotiladi: MacBook Pro M1',
+    description: 'Yaxshi holatda, 1 yil ishlatilgan. Xotira 256GB.',
+    price: '$800',
+    createdAt: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+    id: 'ad_2',
+    ownerId: 'u2',
+    title: 'Frontend dasturchi qidiryapmiz',
+    description: 'React va TailwindCSS bo\'yicha tajribali mutaxassis kerak. Maosh kelishuv asosida.',
+    createdAt: new Date(Date.now() - 3600000).toISOString()
+  },
+  {
+    id: 'ad_3',
+    ownerId: 'u4',
+    title: 'SMM xizmatlari',
+    description: 'Instagram va Telegram sahifalarini yuritish, target yoqish.',
+    price: 'Kelishilgan narxda',
+    createdAt: new Date(Date.now() - 500000).toISOString()
+  }
+];

@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { mockChats, mockMessages, mockUsers } from '../data/mockData';
+import { mockChats, mockMessages, mockUsers, mockAds } from '../data/mockData';
 import { socket } from '../socket';
 
 export const useChatStore = create((set, get) => ({
-  chats: [],
-  messages: {},
-  users: [],
-  ads: [],
+  chats: mockChats,
+  messages: mockMessages,
+  users: mockUsers,
+  ads: mockAds,
   activeChatId: null,
   
   setActiveChat: (chatId) => set({ activeChatId: chatId }),
@@ -14,6 +14,7 @@ export const useChatStore = create((set, get) => ({
   setChats: (chats) => set({ chats }),
   setMessages: (messages) => set({ messages }),
   setAds: (ads) => set({ ads }),
+  addAd: (ad) => set((state) => ({ ads: [ad, ...state.ads] })),
   
   sendMessage: (chatId, text, senderId, imageUrl = null) => {
     const newMessage = {

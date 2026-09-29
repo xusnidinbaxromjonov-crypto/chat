@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Modal from '../ui/Modal';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useChatStore } from '../../store/useChatStore';
 import { socket } from '../../socket';
 
 export default function NewAdModal({ isOpen, onClose }) {
@@ -16,6 +17,9 @@ export default function NewAdModal({ isOpen, onClose }) {
       title,
       createdAt: new Date().toISOString()
     };
+    
+    // Optimsitic UI update
+    useChatStore.getState().addAd(newAd);
     
     socket.emit('new_ad', newAd);
     

@@ -17,7 +17,23 @@ const io = new Server(server, {
 let users = [];
 let chats = [];
 let messages = {}; 
-let ads = [];
+let ads = [
+  {
+    id: 'ad_1',
+    ownerId: 'u1',
+    title: 'Noutbuk sotiladi: MacBook Pro M1',
+    description: 'Yaxshi holatda, 1 yil ishlatilgan. Xotira 256GB.',
+    price: '$800',
+    createdAt: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+    id: 'ad_2',
+    ownerId: 'u2',
+    title: 'Frontend dasturchi qidiryapmiz',
+    description: 'React va TailwindCSS bo\'yicha tajribali mutaxassis kerak. Maosh kelishuv asosida.',
+    createdAt: new Date(Date.now() - 3600000).toISOString()
+  }
+];
 
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
