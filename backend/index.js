@@ -17,33 +17,18 @@ const io = new Server(server, {
 let users = [];
 let chats = [];
 let messages = {}; 
-let ads = [
-  {
-    id: 'ad_1',
-    ownerId: 'u1',
-    title: 'Noutbuk sotiladi: MacBook Pro M1',
-    description: 'Yaxshi holatda, 1 yil ishlatilgan. Xotira 256GB.',
-    price: '$800',
-    createdAt: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    id: 'ad_2',
-    ownerId: 'u2',
-    title: 'Frontend dasturchi qidiryapmiz',
-    description: 'React va TailwindCSS bo\'yicha tajribali mutaxassis kerak. Maosh kelishuv asosida.',
-    createdAt: new Date(Date.now() - 3600000).toISOString()
-  }
-];
+let ads = [];
 
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
   socket.on('login', (user) => {
-    const existing = users.find(u => u.username === user.username);
-    if (!existing) {
+    const existingIndex = users.findIndex(u => u.username === user.username || u.email === user.email);
+    if (existingIndex === -1) {
       users.push({ ...user, isOnline: true });
     } else {
-      existing.isOnline = true;
+      // Update all fields (especially important for UUID changes)
+      users[existingIndex] = { ...users[existingIndex], ...user, isOnline: true };
     }
     io.emit('sync_users', users);
     io.emit('sync_chats', chats);

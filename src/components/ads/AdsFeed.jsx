@@ -75,9 +75,9 @@ export default function AdsFeed() {
             return (
               <div key={ad.id || i} className="ad-card">
                 <div className="ad-card-header">
-                  <img src={owner?.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=U'} alt="" className="ad-avatar" />
+                  <img src={owner?.avatar || ad.ownerAvatar || 'https://api.dicebear.com/7.x/initials/svg?seed=U'} alt="" className="ad-avatar" />
                   <div>
-                    <h4>{owner?.fullName || 'Foydalanuvchi'}</h4>
+                    <h4>{owner?.fullName || ad.ownerName || 'Foydalanuvchi'}</h4>
                     <span className="ad-date">{new Date(ad.createdAt).toLocaleString()}</span>
                   </div>
                 </div>

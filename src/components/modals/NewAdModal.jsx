@@ -14,6 +14,8 @@ export default function NewAdModal({ isOpen, onClose }) {
     const newAd = {
       id: `ad_${Date.now()}`,
       ownerId: user.id,
+      ownerName: user.fullName,
+      ownerAvatar: user.avatar,
       title,
       createdAt: new Date().toISOString()
     };
