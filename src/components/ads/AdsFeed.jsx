@@ -8,7 +8,7 @@ import { MessageSquare, Plus, Tag, Menu } from 'lucide-react';
 import './AdsFeed.css';
 
 export default function AdsFeed() {
-  const { ads, users, setActiveChat, chats } = useChatStore();
+  const { ads, users, setActiveChat, chats, addChat } = useChatStore();
   const { user: currentUser } = useAuthStore();
   const { setSidebarOpen } = useAppStore();
   const [isNewAdOpen, setIsNewAdOpen] = useState(false);
@@ -34,6 +34,9 @@ export default function AdsFeed() {
         isGroup: false,
         participants: [currentUser.id, ad.ownerId]
     };
+    
+    // Optimistic UI update
+    addChat(newChat);
     
     socket.emit('new_chat', newChat);
     setActiveChat(chatId);

@@ -18,6 +18,7 @@ export const useChatStore = create(
       setMessages: (messages) => set({ messages }),
       setAds: (ads) => set({ ads }),
       addAd: (ad) => set((state) => ({ ads: [ad, ...state.ads] })),
+      addChat: (chat) => set((state) => ({ chats: [chat, ...state.chats] })),
   
   sendMessage: (chatId, text, senderId, imageUrl = null) => {
     const newMessage = {

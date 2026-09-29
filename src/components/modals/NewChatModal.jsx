@@ -7,7 +7,7 @@ import { socket } from '../../socket';
 export default function NewChatModal({ isOpen, onClose }) {
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
-  const { sendMessage, setActiveChat, chats, users } = useChatStore();
+  const { sendMessage, setActiveChat, chats, users, addChat } = useChatStore();
   const { user: currentUser } = useAuthStore();
 
   const handleCreate = () => {
@@ -32,6 +32,14 @@ export default function NewChatModal({ isOpen, onClose }) {
            isRead: false
         }
     };
+    
+    // Optimistic updates
+    addChat(newChat);
+    const state = useChatStore.getState();
+    state.setMessages({
+      ...state.messages,
+      [chatId]: [newChat.lastMessage]
+    });
     
     socket.emit('new_message', { chatId, message: newChat.lastMessage, chat: newChat });
     setActiveChat(chatId);
