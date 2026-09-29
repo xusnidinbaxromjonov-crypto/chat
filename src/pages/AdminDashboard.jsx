@@ -91,7 +91,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </td>
-                    <td>{u.email}</td>
+                    <td>{u.email || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Kiritilmagan</span>}</td>
                     <td>Sep 12, 2026</td>
                     <td>
                       <span className="status-badge active">Active</span>
